@@ -1,0 +1,15 @@
+{
+  "name": "@weivea/qr-code-wasm",
+  "collaborators": [
+    "weijianli <weijianli@xiaomi.com>"
+  ],
+  "version": "0.1.0",
+  "files": [
+    "qr_code_wasm_bg.wasm",
+    "qr_code_wasm.js",
+    "qr_code_wasm.d.ts"
+  ],
+  "module": "qr_code_wasm.js",
+  "types": "qr_code_wasm.d.ts",
+  "sideEffects": false
+}
