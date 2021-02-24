@@ -1,69 +1,66 @@
-<div align="center">
+# qr-code-wasm
 
-  <h1><code>wasm-pack-template</code></h1>
+基于wasm 的二维码数据生成生成
 
-  <strong>A template for kick starting a Rust and WebAssembly project using <a href="https://github.com/rustwasm/wasm-pack">wasm-pack</a>.</strong>
+![pic](./pic.png)
 
-  <p>
-    <a href="https://travis-ci.org/rustwasm/wasm-pack-template"><img src="https://img.shields.io/travis/rustwasm/wasm-pack-template.svg?style=flat-square" alt="Build Status" /></a>
-  </p>
-
-  <h3>
-    <a href="https://rustwasm.github.io/docs/wasm-pack/tutorials/npm-browser-packages/index.html">Tutorial</a>
-    <span> | </span>
-    <a href="https://discordapp.com/channels/442252698964721669/443151097398296587">Chat</a>
-  </h3>
-
-  <sub>Built with 🦀🕸 by <a href="https://rustwasm.github.io/">The Rust and WebAssembly Working Group</a></sub>
-</div>
-
-## About
-
-[**📚 Read this template tutorial! 📚**][template-docs]
-
-This template is designed for compiling Rust libraries into WebAssembly and
-publishing the resulting package to NPM.
-
-Be sure to check out [other `wasm-pack` tutorials online][tutorials] for other
-templates and usages of `wasm-pack`.
-
-[tutorials]: https://rustwasm.github.io/docs/wasm-pack/tutorials/index.html
-[template-docs]: https://rustwasm.github.io/docs/wasm-pack/tutorials/npm-browser-packages/index.html
-
-## 🚴 Usage
-
-### 🐑 Use `cargo generate` to Clone this Template
-
-[Learn more about `cargo generate` here.](https://github.com/ashleygwilliams/cargo-generate)
-
+## install
 ```
-cargo generate --git https://github.com/rustwasm/wasm-pack-template.git --name my-project
-cd my-project
+npm i @weivea/qr-code-wasm
 ```
 
-### 🛠️ Build with `wasm-pack build`
+## usage
+
+qr-code-wasm 以esm 的方式提供，       
+
+下边代码需要webpack打包，webpack目前已经支持 import wasm
+
+可参考： [example](./www)
+
+```javascript
+import { QR, Cell } from "qr-code-wasm";
+import { memory } from "qr-code-wasm/qr_code_wasm_bg.wasm";
+
+let qr = QR.new("Hello");
+let width = qr.width();
+const cellsPtr = qr.cells(); // < universe's cells
+const cells = new Uint8Array(memory.buffer, cellsPtr, width * width);
+
+let outStr = "";
+for (let row = 0; row < width; row++) {
+  for (let col = 0; col < width; col++) {
+    let index = row * width + col;
+    let cell = cells[index] == Cell.Alive ? "◼" : " ";
+    outStr += cell;
+  }
+  outStr += "\n";
+}
+
+console.log(outStr);
+document.querySelector("#qr").innerText = outStr;
+
+// canvas
+const CELL_SIZE = 5; // px
+const DEAD_COLOR = "#FFFFFF";
+const ALIVE_COLOR = "#000000";
+const canvas = document.getElementById("qr-canvas");
+canvas.height = CELL_SIZE * width;
+canvas.width = CELL_SIZE * width;
+
+const ctx = canvas.getContext("2d");
+
+ctx.beginPath();
+
+for (let row = 0; row < width; row++) {
+  for (let col = 0; col < width; col++) {
+    let idx = row * width + col;
+    ctx.fillStyle = cells[idx] === Cell.Dead ? DEAD_COLOR : ALIVE_COLOR;
+
+    ctx.fillRect(col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+  }
+}
+
+ctx.stroke();
+
 
 ```
-wasm-pack build
-```
-
-### 🔬 Test in Headless Browsers with `wasm-pack test`
-
-```
-wasm-pack test --headless --firefox
-```
-
-### 🎁 Publish to NPM with `wasm-pack publish`
-
-```
-wasm-pack publish
-```
-
-## 🔋 Batteries Included
-
-* [`wasm-bindgen`](https://github.com/rustwasm/wasm-bindgen) for communicating
-  between WebAssembly and JavaScript.
-* [`console_error_panic_hook`](https://github.com/rustwasm/console_error_panic_hook)
-  for logging panic messages to the developer console.
-* [`wee_alloc`](https://github.com/rustwasm/wee_alloc), an allocator optimized
-  for small code size.
